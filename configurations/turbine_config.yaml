@@ -1,0 +1,6 @@
+InitializationSettings:
+  config_id: config 1
+wind_turbines:
+- hub_height: 130.0
+  number_of_turbines: 1
+  turbine_id: E-126/4200
