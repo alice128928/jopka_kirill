@@ -1,21 +1,70 @@
-import matplotlib.pyplot as plt
-import pandas as pd
-import numpy as np
-import yaml
-from datetime import datetime
+# cosim.py
+# Fully Δt/end_time flexible co-simulation + interactive plot selector
 
-from ev_request import ev_generate_from_config
-from car_new import car_create
-from car_new_soc import car_create_soc
+import os
+from datetime import datetime
+import yaml
+import numpy as np
+import pandas as pd
+import plotly.graph_objects as go
+from numpy import shape
+
 from load_reading import give_load_w
-from scipy.signal import find_peaks
+from ev_request import ev_generate_from_config  # (kept for compatibility, not used directly here)
+from car_new import car_create_from_yaml
+      # (kept for compatibility)
 from price_market import give_price
 from battery_storage import BatteryStorage
 
+SESSIONS_CSV = "data/data_cars.csv"   # optional sessions file with Initial SoC etc.
 
-# ---------- helpers ----------
+
+# ----------------- YAML → sessions fallback (for SoC) -----------------
+def _sessions_df_from_yaml(ev_yaml_path: str) -> pd.DataFrame:
+    """Build sessions from configurations/ev_config.yaml if CSV is absent."""
+    try:
+        with open(ev_yaml_path, "r") as f:
+            y = yaml.safe_load(f)
+    except Exception:
+        y = None
+
+    cars = (y or {}).get("InitializationSettings", {}).get("cars", []) or []
+    rows = []
+    for row in cars:
+        vid = str(row.get("id", "Vehicle#"))
+        ad  = str(row.get("arrival_date", ""))     # 'YYYY-MM-DD'
+        at  = str(row.get("arrival_time", ""))     # 'HH:MM' or 'HH:MM:SS'
+        dd  = str(row.get("departure_date", ""))
+        dtm = str(row.get("departure_time", ""))
+
+        def _combine(d, t):
+            try:
+                if len(t) == 5:
+                    hhmm = datetime.strptime(t, "%H:%M").time()
+                else:
+                    hhmm = datetime.strptime(t, "%H:%M:%S").time()
+                iso = datetime.combine(datetime.fromisoformat(d).date(), hhmm).isoformat()
+                return iso
+            except Exception:
+                return f"{d}T{t}" if d and t else ""
+
+        eta_iso = _combine(ad, at)
+        etd_iso = _combine(dd, dtm)
+
+        rows.append({
+            "Vehicle ID": vid,
+            "ETA [ISO8601]": eta_iso,
+            "ETD [ISO8601]": etd_iso,
+            "Charging start time [ISO8601]": eta_iso,  # start = ETA
+            "Charging end time [ISO8601]": etd_iso,    # end   = ETD
+            "Initial SoC [%]": 0.0,                    # if not provided
+        })
+
+    return pd.DataFrame(rows)
+
+
+# ----------------- misc helpers -----------------
 def _resolve_car_idx(names, wanted_id: str) -> int:
-    """Return index of wanted_id in names (exact match), else 0."""
     if not names:
         return 0
     wanted_id = (wanted_id or "").strip()
@@ -26,18 +75,210 @@ def _resolve_car_idx(names, wanted_id: str) -> int:
 
 
 def port_power_series(charger_usage, charging_ports, selected_port, num_steps):
-    """Return [W] time series for `selected_port` (1-based) from charger_usage."""
-    series = []
+    """Return [W] series for selected_port, safe for any horizon."""
+    n_ports = len(charging_ports) if charging_ports is not None else 0
+    if n_ports == 0:
+        return [0.0] * num_steps
+
+    selected_port = int(selected_port)
+    if selected_port < 1 or selected_port > n_ports:
+        selected_port = 1
+
+    n_cars = len(charger_usage) if charger_usage is not None else 0
+    avail_T = min((len(charger_usage[i]) for i in range(n_cars)), default=0)
+
+    out = []
     for t in range(num_steps):
-        active = any(int(charger_usage[car][t]) == selected_port for car in range(len(charger_usage)))
-        series.append(float(charging_ports[selected_port - 1]) if active else 0.0)
-    return series
+        if t < avail_T:
+            active = any(int(charger_usage[c][t]) == selected_port for c in range(n_cars))
+            out.append(float(charging_ports[selected_port - 1]) if active else 0.0)
+        else:
+            out.append(0.0)
+    return out
+
+
+def _read_sessions_dataframe(path: str) -> pd.DataFrame:
+    """Try CSV first; if missing/invalid, fallback to YAML sessions."""
+    cols = [
+        "Vehicle ID", "ETA [ISO8601]", "ETD [ISO8601]",
+        "Charging start time [ISO8601]", "Charging end time [ISO8601]",
+        "Initial SoC [%]"
+    ]
+
+    use_yaml_fallback = False
+    df = pd.DataFrame(columns=cols)
+
+    if os.path.exists(path):
+        try:
+            df = pd.read_csv(path)
+            df.columns = [c.strip() for c in df.columns]
+            if not set(cols[:5]).issubset(df.columns):
+                use_yaml_fallback = True
+            else:
+                if "Initial SoC [%]" not in df.columns:
+                    df["Initial SoC [%]"] = 0.0
+        except Exception:
+            use_yaml_fallback = True
+    else:
+        use_yaml_fallback = True
+
+    if use_yaml_fallback:
+        df = _sessions_df_from_yaml("configurations/ev_config.yaml")
+
+    for col in cols[1:5]:
+        if col in df.columns:
+            df[col] = pd.to_datetime(df[col], errors="coerce")
+
+    if "Initial SoC [%]" not in df.columns:
+        df["Initial SoC [%]"] = 0.0
+
+    return df[cols] if set(cols).issubset(df.columns) else df
+
+
+# ---------- Δt + multi-day aware mapping for sessions ----------
+def _compute_base0_for_sessions(sdf: pd.DataFrame) -> pd.Timestamp:
+    all_ts = pd.to_datetime(pd.concat([
+        sdf["ETA [ISO8601]"], sdf["Charging start time [ISO8601]"],
+        sdf["Charging end time [ISO8601]"], sdf["ETD [ISO8601]"]
+    ], ignore_index=True), errors="coerce").dropna()
+    return (all_ts.min().normalize() if not all_ts.empty else pd.Timestamp("1970-01-01"))
+
+
+def _ts_to_step_index(ts, base0: pd.Timestamp, start_minutes: int, delta_t: int) -> int:
+    dt = pd.to_datetime(str(ts), errors="coerce")
+    if pd.isna(dt):
+        return 0
+    rel_min = int((dt - base0).total_seconds() // 60) - int(start_minutes)
+    if rel_min < 0:
+        return 0
+    return rel_min // max(1, int(delta_t))
+
+
+def _sessions_for_vehicle_step_index(
+    sdf: pd.DataFrame, vehicle_id: str, steps_len: int, start_minutes: int, delta_t: int
+) -> list[dict]:
+    need = [
+        "Vehicle ID","ETA [ISO8601]","ETD [ISO8601]",
+        "Charging start time [ISO8601]","Charging end time [ISO8601]","Initial SoC [%]"
+    ]
+    for c in need:
+        if c not in sdf.columns:
+            raise ValueError(f"Sessions CSV missing column: {c}")
+
+    df = sdf[sdf["Vehicle ID"].astype(str).str.strip() == str(vehicle_id).strip()].copy()
+    if df.empty:
+        return []
+
+    df.sort_values("ETA [ISO8601]", inplace=True)
+    base0 = _compute_base0_for_sessions(df)
+
+    out = []
+    for _, row in df.iterrows():
+        eta_i   = _ts_to_step_index(row["ETA [ISO8601]"], base0, start_minutes, delta_t)
+        start_i = _ts_to_step_index(row["Charging start time [ISO8601]"], base0, start_minutes, delta_t)
+        end_i   = _ts_to_step_index(row["Charging end time [ISO8601]"], base0, start_minutes, delta_t)
+        etd_i   = _ts_to_step_index(row["ETD [ISO8601]"], base0, start_minutes, delta_t)
+
+        eta_i   = max(0, min(eta_i,   steps_len - 1))
+        start_i = max(start_i, eta_i);  start_i = min(start_i, steps_len - 1)
+        end_i   = max(end_i,   start_i); end_i = min(end_i,   steps_len - 1)
+        etd_i   = max(etd_i,   end_i);   etd_i = min(etd_i,   steps_len - 1)
+
+        out.append({
+            "eta_i": eta_i, "start_i": start_i, "end_i": end_i, "etd_i": etd_i,
+            "eta_ts": row["ETA [ISO8601]"], "start_ts": row["Charging start time [ISO8601]"],
+            "end_ts": row["Charging end time [ISO8601]"], "etd_ts": row["ETD [ISO8601]"],
+            "initial_soc": float(row.get("Initial SoC [%]", np.nan)),
+        })
+    return out
+
+
+# -------- SoC from capacity peaks within each session (Δt-safe) --------
+def soc_timeline_from_session_peaks(
+    car_idx: int, car_id: str, battery_capacity_arrays, battery_caps,
+    charger_usage, steps_len: int, sessions_df_path: str,
+    start_minutes: int, delta_t: int
+) -> np.ndarray:
+
+    cap_wh_total = float(battery_caps[car_idx])
+    cap_series = np.asarray(battery_capacity_arrays[car_idx], dtype=float)
+    ports = np.asarray(charger_usage[car_idx], dtype=int) if charger_usage is not None else np.zeros_like(cap_series, int)
+
+    T = min(int(steps_len), len(cap_series), len(ports))
+    if T <= 0 or cap_wh_total <= 0:
+        return np.array([])
+
+    cap = cap_series[:T]
+    sessions_raw = _read_sessions_dataframe(sessions_df_path)
+    sessions = _sessions_for_vehicle_step_index(sessions_raw, car_id, T, start_minutes, delta_t)
+
+    soc = np.zeros(T, dtype=float)
+
+    if not sessions:
+        first_soc = (cap[0] / cap_wh_total) * 100.0
+        soc[:] = first_soc
+        print(f"[{car_id}] No sessions found; SoC held at {first_soc:.2f}%")
+        return soc
+
+    def _fmt(ts):
+        try:
+            return pd.to_datetime(ts).strftime("%Y-%m-%d %H:%M")
+        except Exception:
+            return str(ts)
+
+    print(f"\nSession audit for {car_id} (ΔSoC added per charging window)")
+    total_bump = 0.0
+
+    first = sessions[0]
+    hold = float(first["initial_soc"]) if np.isfinite(first["initial_soc"]) else (cap[0] / cap_wh_total) * 100.0
+    soc[:first["eta_i"]] = hold
+    last_etd = 0
+
+    for idx, s in enumerate(sessions, start=1):
+        eta_i, st_i, en_i, etd_i = s["eta_i"], s["start_i"], s["end_i"], s["etd_i"]
+        init_soc = float(s["initial_soc"]) if np.isfinite(s["initial_soc"]) else hold
+
+        if last_etd < eta_i:
+            soc[last_etd:eta_i] = hold
+
+        if eta_i < st_i:
+            soc[eta_i:st_i] = init_soc
+        else:
+            st_i = eta_i
+
+        if en_i >= st_i:
+            peak_wh = float(cap[st_i:en_i+1].max())
+            bump_pct = (peak_wh / cap_wh_total) * 100.0
+            final_soc = init_soc + bump_pct
+
+            n = max(1, en_i - st_i + 1)
+            ramp = np.linspace(init_soc, final_soc, n)
+            soc[st_i:en_i+1] = ramp
+        else:
+            bump_pct = 0.0
+            final_soc = init_soc
+            peak_wh = 0.0
+
+        if en_i < etd_i:
+            soc[en_i:etd_i] = final_soc
+
+        print(f"[{car_id}] Session {idx}: {_fmt(s['start_ts'])}→{_fmt(s['end_ts'])} | "
+              f"Initial={init_soc:.5f}% | ΔSoC={bump_pct:.2f}% | Final={final_soc:.2f}% "
+              f"(peak {peak_wh:.0f} Wh)")
+        total_bump += bump_pct
+
+        hold = final_soc
+        last_etd = etd_i
+
+    if last_etd < T:
+        soc[last_etd:] = hold
+
+    print(f"[{car_id}] Total ΔSoC added across sessions: {total_bump:.2f}%\n")
+    return soc
 
 
 # ---------- light wrapper ----------
 class Model:
-    """Wrapper class for modeling any physical process (e.g., power flow, heat production)."""
-
     def __init__(self, process_model):
         if not callable(process_model):
             raise ValueError("The process must be a function or callable class.")
@@ -48,8 +289,6 @@ class Model:
 
 
 class Manager:
-    """Orchestrates the data exchanged between coupled models."""
-
     def __init__(self, models: list[Model], settings_configuration: dict):
         self.models = models
         self.electric_grid = models[0]
@@ -63,333 +302,260 @@ class Manager:
         self.settings_configuration = settings_configuration
 
     def run_simulation(self):
+        # ---- timing + sim config ----
         config = self.settings_configuration
-        config_id = config["InitializationSettings"]["config_id"]
-        start_time = config["InitializationSettings"]["time"]["start_time"]
-        end_time = config["InitializationSettings"]["time"]["end_time"]
+        config_id  = config["InitializationSettings"]["config_id"]
+        start_time = int(config["InitializationSettings"]["time"]["start_time"])  # minutes
+        end_time   = int(config["InitializationSettings"]["time"]["end_time"])    # minutes
 
-        grid_topology = pd.read_csv(config["InitializationSettings"]["grid_topology"])
-        passive_consumer_power_setpoints = pd.read_csv(
-            config["InitializationSettings"]["passive_consumers_power_setpoints"],
-            index_col="snapshots",
-            parse_dates=True,
-        )
-
-        # read controller YAML (plot selections, modes, etc.)
         with open("configurations/controller_add_config.yaml", "r") as f:
             config_data = yaml.safe_load(f)
 
         configs = config_data["InitializationSettings"]["configs"][0]
-        grid_capacity = float(configs["grid_capacity"])
-        initial_money = float(configs["initial_money"])
-        storage_capacity = float(configs["storage_capacity"])
-        option = configs["option"]                      # "Enter data manually" | "Upload a file"
-        option_1 = configs["option_1"]                  # load mode
-        delta_t = int(configs["timestep"])
-        options = configs.get("options", "")            # predict mode when using files
-        selected_port = int(configs.get("plot_port", 1))
-        selected_car_id = str(configs.get("plot_car_id", "")).strip()
+        grid_capacity     = float(configs["grid_capacity"])
+        initial_money     = float(configs["initial_money"])
+        storage_capacity  = float(configs["storage_capacity"])
+        delta_t           = int(configs["timestep"])
+        selected_port     = int(configs.get("plot_port", 1))
+        selected_car_id   = str(configs.get("plot_car_id", "")).strip()
 
-        # accumulators
-        times = []
+        # ---- accumulators ----
+        times = []  # minutes since sim start (x-axis)
         wind_energy = []
         solar_energy = []
-        power_setpoint_array = [0]
+        power_setpoint_array = [0]          # one element longer than times
         storage_array = []
         storage_array_percentage = []
         money_array = [initial_money]
-        signal_a = 0
+        load_array = []
+        market_price_array = []
 
-        # This will hold the selected port power to plot (manual or predicted)
-        selected_port_power = []
-
+        # ---- storage battery object ----
         battery = self.storage_battery.calculate(storage_capacity, 0.95, 0.95, 0)
 
-        if option_1 == "Enter data manually":
-            constant_load_value = float(configs["add_load"])
-        else:
-            constant_load_series = []
-            signal_a = 1
+        steps_len = max(0, (end_time - start_time) // max(1, delta_t))
 
-        # EV inputs
-        if option == "Enter data manually":
-            car_names, battery_caps, charging_ports, availability_arrays, battery_capacity_arrays, status_cars = \
-                ev_generate_from_config("configurations/ev_config.yaml", end_time, delta_t)
-            charger_usage = None  # not used in manual mode
-        else:
-            if options == "predict end time":
-                res = car_create_soc("data/data_cars.csv", "data/port_capacity_car.csv")
-            else:  # "predict soc" default
-                res = car_create("data/data_cars.csv", "data/port_capacity_car.csv")
-            # expected 7 values
-            (car_names, battery_caps, charger_usage, charging_ports,
-             availability_arrays, battery_capacity_arrays, status_cars) = res
-
-        # figure out which car to highlight
+        (car_names, battery_caps, charger_usage, charging_ports,
+         availability_arrays, battery_capacity_arrays, status_cars) = car_create_from_yaml(
+            ev_yaml_path="configurations/ev_config.yaml",
+            ports_yaml_path="configurations/port_data.yaml",
+            start_minutes=start_time,
+            delta_minutes=delta_t,
+            steps_len=steps_len,
+        )
         car_idx_to_plot = _resolve_car_idx(car_names, selected_car_id)
+        print(status_cars)
+        print(battery_caps)
+        print(car_names)
+        print(charger_usage)
+        print(charging_ports)
+        # ---- horizon built only from start/end/Δt ----
+        time_steps = max(0, (end_time - start_time) // max(1, delta_t))
 
-        # main loop
-        time_steps = int((end_time - start_time) / delta_t)
-        for time_step in range(time_steps):
-            time_clock = start_time + time_step * delta_t
-            corresponding_time = passive_consumer_power_setpoints.index[time_step]
+        # ---- main loop ----
+        for step in range(time_steps):
+            tmin = start_time + step * delta_t  # minutes since sim zero
+            time_clock = tmin
 
-            # grid calc
-            all_consumer_voltages = self.electric_grid.calculate(
-                passive_consumer_power_setpoints,
-                power_setpoint_array[time_step],
-                grid_topology,
-                corresponding_time,
+            wind_energy_time   = self.wind.calculate(time_clock)
+            solar_energy_time  = self.solar.calculate(time_clock)
+            current_price_time = self.price_market.calculate(time_clock)
+            ev_state_time      = self.evstate.calculate(step, availability_arrays, battery_caps, battery_capacity_arrays)
+
+            constant_load_time = give_load_w(time_clock)
+
+            for i in range(len(status_cars)):
+                status_cars[i][step] = ev_state_time[i]
+
+            money, battery, power_set_point, battery_capacity_arrays, _ = self.controller.calculate(
+                status_cars, charging_ports, battery, money_array[step], step, battery_capacity_arrays,
+                solar_energy_time, wind_energy_time, current_price_time, storage_capacity, grid_capacity,
+                0, power_setpoint_array[step],
+                battery_caps, availability_arrays, charger_usage, delta_t, constant_load_time
             )
 
-            # sources + market + EV state
-            wind_energy_time = self.wind.calculate(time_clock)
-            solar_energy_time = self.solar.calculate(time_clock)
-            current_price_time = self.price_market.calculate(time_clock)
-            ev_state_time = self.evstate.calculate(time_step, availability_arrays, battery_caps, battery_capacity_arrays)
-
-            # load
-            if signal_a == 1:
-                constant_load_time = give_load_w(time_step, delta_t)
-            else:
-                constant_load_time = constant_load_value
-
-            # update EV statuses
-            for i in range(len(status_cars)):
-                status_cars[i][time_step] = ev_state_time[i]
-
-            # controller + selected-port power capture
-            if option == "Enter data manually":
-                out = self.controller_2.calculate(
-                    status_cars, charging_ports, battery, money_array[time_step], time_step, battery_capacity_arrays,
-                    solar_energy_time, wind_energy_time, current_price_time, storage_capacity, grid_capacity,
-                    # smart_consumer_voltage not used for plotting anymore
-                    all_consumer_voltages["consumers"]["smart_consumer"],
-                    power_setpoint_array[time_step], battery_caps, availability_arrays,
-                    delta_t, constant_load_time
-                )
-                # accept 4 or 5 results (5th often P_port of active charger)
-                if isinstance(out, (list, tuple)):
-                    if len(out) == 4:
-                        money, battery, power_set_point, battery_capacity_arrays = out
-                        P_port = 0.0
-                    elif len(out) == 5:
-                        money, battery, power_set_point, battery_capacity_arrays, P_port = out
-                    else:
-                        raise ValueError(f"controller_2.calculate returned {len(out)} values.")
-                else:
-                    raise ValueError("controller_2.calculate did not return a tuple/list.")
-
-                # record manual selected-port power. If the controller gave P_port,
-                # use it only when it corresponds to the chosen port; otherwise 0.
-                # If your controller always returns the ACTIVE port's rating, we
-                # can’t know which index it was; so we take P_port when it matches
-                # the chosen port’s rating, else 0.
-                sel_rating = float(charging_ports[selected_port - 1]) if charging_ports else 0.0
-                selected_port_power.append(P_port if abs(P_port - sel_rating) < 1e-6 else 0.0)
-
-            else:
-                out = self.controller.calculate(
-                    status_cars, charging_ports, battery, money_array[time_step], time_step, battery_capacity_arrays,
-                    solar_energy_time, wind_energy_time, current_price_time, storage_capacity, grid_capacity,
-                    all_consumer_voltages["consumers"]["smart_consumer"], power_setpoint_array[time_step],
-                    battery_caps, availability_arrays, charger_usage, delta_t, constant_load_time, time_clock
-                )
-                # accept 4 or 5
-                if isinstance(out, (list, tuple)):
-                    if len(out) == 5:
-                        money, battery, power_set_point, battery_capacity_arrays, P_port = out
-                    elif len(out) == 4:
-                        money, battery, power_set_point, battery_capacity_arrays = out
-                        P_port = 0.0
-                    else:
-                        raise ValueError(f"controller.calculate returned {len(out)} values.")
-                else:
-                    raise ValueError("controller.calculate did not return a tuple/list.")
-
-            # append state
-            times.append(time_clock)
+            # accumulate
+            times.append(tmin)
             wind_energy.append(wind_energy_time)
             solar_energy.append(solar_energy_time)
-            if signal_a == 1:
-                constant_load_series.append(constant_load_time)
-
-            if isinstance(power_set_point, list):
-                raise ValueError(f"Expected scalar power_set_point, got list: {power_set_point}")
             power_setpoint_array.append(power_set_point)
             storage_array.append(battery.get_soc())
             storage_array_percentage.append(battery.get_soc_percentage())
             money_array.append(money)
+            load_array.append(constant_load_time)
+            market_price_array.append(current_price_time)
 
-        # Build selected-port series for predicted mode from charger_usage;
-        # for manual we already built it above. If manual didn’t produce anything,
-        # fill with zeros so the plot renders.
-        if option != "Enter data manually":
-            selected_port_power = port_power_series(
-                charger_usage=charger_usage,
-                charging_ports=charging_ports,
-                selected_port=selected_port,
-                num_steps=len(times),
-            )
-        if not selected_port_power:
-            selected_port_power = [0.0] * len(times)
+        # ---- derived series ----
+        selected_port_power = port_power_series(
+            charger_usage=charger_usage,
+            charging_ports=charging_ports,
+            selected_port=selected_port,
+            num_steps=len(times),
+        )
 
-        # choose plotter
-        if option == "Enter data manually":
-            self.plot_results_manual(
-                times,
-                selected_port_power,             # <— plot selected port (not voltage)
-                battery_capacity_arrays,
-                solar_energy,
-                wind_energy,
-                storage_array,
-                money_array,
-                config_id,
-                car_idx_to_plot,                 # <— only selected car
-            )
-        else:
-            self.plot_results_pred(
-                times,
-                selected_port_power,
-                battery_capacity_arrays,
-                solar_energy,
-                wind_energy,
-                storage_array,
-                money_array,
-                config_id,
-                charger_usage,
-                charging_ports,
-                car_idx_to_plot,                 # <— only selected car
-            )
+        soc_pct = soc_timeline_from_session_peaks(
+            car_idx_to_plot,
+            car_names[car_idx_to_plot] if car_names else "",
+            battery_capacity_arrays,
+            battery_caps,
+            charger_usage,
+            steps_len=len(times),
+            sessions_df_path=SESSIONS_CSV,
+            start_minutes=start_time,
+            delta_t=delta_t,
+        )
 
-    # --------------------- plotters ---------------------
-    def plot_results_manual(self, times, port_power, battery_capacity_arrays, solar_energy, wind_energies,
-                            storage_array, money_array, config_id, car_idx_to_plot: int):
-        import numpy as np
-        import matplotlib.pyplot as plt
-        from scipy.signal import find_peaks
+        # align setpoints to times
+        ps_series = np.asarray(power_setpoint_array[1:1 + len(times)], dtype=float)
 
-        series_1d = [port_power, solar_energy, wind_energies, storage_array, money_array]
-        min_len = min([len(times)] + [len(s) for s in series_1d])
+        # ---- plot ----
+        results = self.plot_results_pred(
+            np.asarray(times),
+            selected_port_power,
+            solar_energy,
+            wind_energy,
+            storage_array,
+            storage_array_percentage,
+            ps_series,
+            money_array,
+            config_id,
+            charger_usage,
+            charging_ports,
+            car_idx_to_plot,
+            selected_port,
+            soc_pct,
+        )
+
+        return results
+
+    def plot_results_pred(
+        self,
+        times,
+        port_power,
+        solar_energy,
+        wind_energies,
+        storage_array,
+        storage_array_percentage,
+        power_setpoint_series,
+        money_array,
+        config_id,
+        charger_usage,
+        power_charging_port,
+        car_idx_to_plot,
+        selected_port,
+        soc_pct,
+    ):
+        # ---- Trim to a common length (SoC is separate timeline but same steps) ----
+        series_1d = [
+            port_power, solar_energy, wind_energies,
+            storage_array, storage_array_percentage,
+            power_setpoint_series, money_array
+        ]
+        min_len = min([len(times)] + [len(s) for s in series_1d]) if len(series_1d) else len(times)
         times = np.asarray(times)[:min_len]
         port_power = np.asarray(port_power)[:min_len]
         solar_energy = np.asarray(solar_energy)[:min_len]
         wind_energies = np.asarray(wind_energies)[:min_len]
         storage_array = np.asarray(storage_array)[:min_len]
+        storage_array_percentage = np.asarray(storage_array_percentage)[:min_len]
+        power_setpoint_series = np.asarray(power_setpoint_series)[:min_len]
         money_array = np.asarray(money_array)[:min_len]
-        battery_capacity_arrays = [np.asarray(b)[:min_len] for b in battery_capacity_arrays]
+        index = car_idx_to_plot + 1
 
-        fig, axs = plt.subplots(3, 2, figsize=(14, 10))
+        # SoC timeline — same horizon
+        soc_plot = np.asarray(soc_pct)[:min_len]
 
-        # Selected Port Power (top-left)
-        axs[0, 0].plot(times, port_power)
-        axs[0, 0].set_title("Selected Port Power", color="black")
-        axs[0, 0].set_xlabel("Time [steps]", color="black")
-        axs[0, 0].set_ylabel("Power [W]", color="black")
+        # ---- Build a single-axes figure with 8 traces (one visible at a time) ----
+        fig = go.Figure()
 
-        # Selected Car’s Battery Capacity (top-right)
-        car_capacity = battery_capacity_arrays[car_idx_to_plot]
-        peaks, _ = find_peaks(car_capacity, height=0)
-        axs[0, 1].plot(times, car_capacity, label=f"Car {car_idx_to_plot + 1}")
-        if len(peaks) > 0:
-            axs[0, 1].plot(times[peaks], car_capacity[peaks], "o", ms=3)
-        axs[0, 1].set_title("Battery Capacity (Selected Car)", color="black")
-        axs[0, 1].set_xlabel("Time [steps]", color="black")
-        axs[0, 1].set_ylabel("Capacity [Wh]", color="black")
-        axs[0, 1].legend(fontsize=8)
+        # X-axis is "minutes since start" everywhere
+        traces = [
+            dict(name=f"Power at Port #{selected_port}",
+                 x=times, y=port_power,
+                 ylab="Power [W] usage of the selected port",
+                 xlab="Minutes since start"),
+            dict(name=f"SoC Timeline of car #{index}",
+                 x=times, y=soc_plot,
+                 ylab="SoC [%] of the selected car",
+                 xlab="Minutes since start"),
+            dict(name="Solar panels energy production",
+                 x=times, y=solar_energy,
+                 ylab="Solar Energy [W]",
+                 xlab="Minutes since start"),
+            dict(name="Wind turbine energy production",
+                 x=times, y=wind_energies,
+                 ylab="Wind Energy [W]",
+                 xlab="Minutes since start"),
+            dict(name="Storage (Energy) at the hub",
+                 x=times, y=storage_array,
+                 ylab="Storage [Wh]",
+                 xlab="Minutes since start"),
+            dict(name="Storage (State of Charge %) at the hub",
+                 x=times, y=storage_array_percentage,
+                 ylab="SoC [%] of the energy storage",
+                 xlab="Minutes since start"),
+            dict(name="Operational cost of the hub",
+                 x=times, y=money_array,
+                 ylab="Money [€]",
+                 xlab="Minutes since start"),
+            dict(name="Grid perspective overview",
+                 x=times, y=power_setpoint_series,
+                 ylab="Setpoint [W]",
+                 xlab="Minutes since start"),
+        ]
 
-        # Solar
-        axs[1, 0].plot(times, solar_energy)
-        axs[1, 0].set_title("Solar Production", color="black")
-        axs[1, 0].set_xlabel("Time [steps]", color="black")
-        axs[1, 0].set_ylabel("Energy [Wh]", color="black")
+        # Add all traces (only the first visible initially)
+        for i, t in enumerate(traces):
+            fig.add_trace(go.Scatter(
+                x=t["x"], y=t["y"], mode="lines",
+                name=t["name"],
+                visible=(i == 0)
+            ))
 
-        # Wind
-        axs[1, 1].plot(times, wind_energies)
-        axs[1, 1].set_title("Wind Energy", color="black")
-        axs[1, 1].set_xlabel("Time [steps]", color="black")
-        axs[1, 1].set_ylabel("Energy [Wh]", color="black")
+        # Helper to build visibility mask + axis/title updates
+        def _button(i):
+            vis = [False] * len(traces)
+            vis[i] = True
+            lock_soc_range = traces[i]["name"].startswith("Storage (State of Charge")
+            return dict(
+                label=str(i + 1),
+                method="update",
+                args=[
+                    {"visible": vis},
+                    {
+                        "title": {"text": traces[i]["name"]},
+                        "xaxis": {"title": {"text": traces[i]["xlab"]}},
+                        "yaxis": {
+                            "title": {"text": traces[i]["ylab"]},
+                            **({"range": [0, 100]} if lock_soc_range else {})
+                        },
+                    },
+                ],
+            )
 
-        # Storage
-        axs[2, 0].plot(times, storage_array)
-        axs[2, 0].set_title("Storage", color="black")
-        axs[2, 0].set_xlabel("Time [steps]", color="black")
-        axs[2, 0].set_ylabel("Energy [Wh]", color="black")
+        fig.update_layout(
+            updatemenus=[
+                dict(
+                    type="buttons",
+                    direction="right",
+                    x=0.5, xanchor="center",
+                    y=1.12, yanchor="top",
+                    buttons=[_button(i) for i in range(len(traces))],
+                    showactive=True,
+                )
+            ],
+            title={"text": traces[0]["name"], "x": 0.5, "xanchor": "center"},
+            xaxis={"title": {"text": traces[0]["xlab"]}},
+            yaxis={"title": {"text": traces[0]["ylab"]}},
+            template="plotly_dark",
+            height=650,
+            width=1100,
+            showlegend=False,
+            margin=dict(l=80, r=30, t=100, b=80),
+        )
 
-        # Money
-        axs[2, 1].plot(times, money_array)
-        axs[2, 1].set_title("Money", color="black")
-        axs[2, 1].set_xlabel("Time [steps]", color="black")
-        axs[2, 1].set_ylabel("Money [$]", color="black")
+        # Save interactive HTML that preserves the selector
+        out_html = f"results_config{config_id}_selector.html"
+        fig.write_html(out_html)
 
-        plt.tight_layout()
-        plt.savefig(f"results_config{config_id}.png")
-
-    def plot_results_pred(self, times, port_power, battery_capacity_arrays, solar_energy, wind_energies,
-                          storage_array, money_array, config_id, charger_usage, power_charging_port,
-                          car_idx_to_plot: int):
-        import numpy as np
-        import matplotlib.pyplot as plt
-        from scipy.signal import find_peaks
-
-        series_1d = [port_power, solar_energy, wind_energies, storage_array, money_array]
-        min_len = min([len(times)] + [len(s) for s in series_1d])
-        times = np.asarray(times)[:min_len]
-        port_power = np.asarray(port_power)[:min_len]
-        solar_energy = np.asarray(solar_energy)[:min_len]
-        wind_energies = np.asarray(wind_energies)[:min_len]
-        storage_array = np.asarray(storage_array)[:min_len]
-        money_array = np.asarray(money_array)[:min_len]
-        battery_capacity_arrays = [np.asarray(b)[:min_len] for b in battery_capacity_arrays]
-
-        plt.style.use("ggplot")
-        fig, axs = plt.subplots(3, 2, figsize=(14, 10))
-
-        # Selected Port Power
-        axs[0, 0].plot(times, port_power)
-        axs[0, 0].set_title("Selected Port Power", color="black")
-        axs[0, 0].set_xlabel("Time [hours]", color="black")
-        axs[0, 0].set_ylabel("Power [W]", color="black")
-
-        # Selected Car’s Battery Capacity (with charger labels)
-        car_capacity = battery_capacity_arrays[car_idx_to_plot]
-        peaks, _ = find_peaks(car_capacity, height=0)
-        peak_values = car_capacity[peaks]
-        axs[0, 1].plot(times, car_capacity, label=f"Car {car_idx_to_plot + 1}", color="black")
-        axs[0, 1].plot(times[peaks], peak_values, "ro", label="Peaks")
-        for tp, val in zip(peaks, peak_values):
-            ch = int(charger_usage[car_idx_to_plot][tp]) if charger_usage is not None else 0
-            label = f"#{ch}"
-            axs[0, 1].annotate(label, (times[tp], val), xytext=(4, 8),
-                               textcoords="offset points", fontsize=8)
-        axs[0, 1].set_title("Battery Capacity (Selected Car)", color="black")
-        axs[0, 1].set_xlabel("Time [hours]", color="black")
-        axs[0, 1].set_ylabel("Battery Capacity [Wh]", color="black")
-        axs[0, 1].legend()
-
-        # Solar
-        axs[1, 0].plot(times, solar_energy, color="orange")
-        axs[1, 0].set_title("Solar Production", color="black")
-        axs[1, 0].set_xlabel("Time [hours]", color="black")
-        axs[1, 0].set_ylabel("Solar Energy [Wh]", color="black")
-
-        # Wind
-        axs[1, 1].plot(times, wind_energies, color="purple")
-        axs[1, 1].set_title("Wind Energy", color="black")
-        axs[1, 1].set_xlabel("Time [hours]", color="black")
-        axs[1, 1].set_ylabel("Wind Energy [Wh]", color="black")
-
-        # Storage
-        axs[2, 0].plot(times, storage_array, color="green")
-        axs[2, 0].set_title("Storage", color="black")
-        axs[2, 0].set_xlabel("Time [hours]", color="black")
-        axs[2, 0].set_ylabel("Storage [Wh]", color="black")
-
-        # Money
-        axs[2, 1].plot(times, money_array, color="red")
-        axs[2, 1].set_title("Money", color="black")
-        axs[2, 1].set_xlabel("Time [hours]", color="black")
-        axs[2, 1].set_ylabel("Money [$]", color="black")
-
-        plt.tight_layout()
-        plt.savefig(f"results_config{config_id}.png")
+        return fig

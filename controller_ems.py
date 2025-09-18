@@ -1,80 +1,13 @@
 import yaml
 from battery_storage import BatteryStorage  # keep import if your project expects it
 
-import pandas as pd
-
-# ---- Load once ----
-DF = pd.read_excel("data/port_capacity_car.xlsx")
-DF = DF.rename(columns={
-    "Ch ID": "ch_id",
-    "Time [ISO8601]": "time_iso",
-    "Predicted output power [kW]": "p_pred_kw"
-})
-DF["time_iso"] = pd.to_datetime(DF["time_iso"]).dt.floor("min")
-
-# Per-port minute index
-PORT_INDEX = {
-    port: d.sort_values("time_iso").set_index("time_iso")[["p_pred_kw"]]
-    for port, d in DF.groupby("ch_id")
-}
-
-# Simulation start = midnight of earliest day in file
-SIM_START_TS = DF["time_iso"].min().normalize()
-
-
-def get_predicted_power_W_by_minute(port_number: int,
-                                    minute_offset: int,
-                                    *,
-                                    allow_nearest: bool = True,
-                                    clamp_edges: bool = False,
-                                    column_is_kW: bool = False) -> float:
-    """
-    Lookup predicted charger power at a given minute offset.
-    Returns power in **Watts**.
-
-    port_number   : Ch ID from the sheet
-    minute_offset : minutes since SIM_START_TS (00:00 of earliest date)
-    allow_nearest : use nearest minute if exact match missing
-    clamp_edges   : when outside data range, use first/last value (else 0)
-    column_is_kW  : set True if your column truly stores kW (default assumes W-like values)
-    """
-    d = PORT_INDEX.get(port_number)
-    if d is None or d.empty:
-        return 0.0
-
-    target_ts = (SIM_START_TS + pd.Timedelta(minutes=int(minute_offset))).floor("min")
-
-    # Exact hit
-    if target_ts in d.index:
-        val = float(d.loc[target_ts, "p_pred_kw"])
-    else:
-        if not allow_nearest:
-            return 0.0
-        idx = d.index
-        if target_ts < idx[0]:
-            if not clamp_edges:
-                return 0.0
-            val = float(d.iloc[0]["p_pred_kw"])
-        elif target_ts > idx[-1]:
-            if not clamp_edges:
-                return 0.0
-            val = float(d.iloc[-1]["p_pred_kw"])
-        else:
-            pos = idx.get_indexer([target_ts], method="nearest")[0]
-            if pos == -1:
-                return 0.0
-            val = float(d.iloc[pos]["p_pred_kw"])
-
-    # Convert to Watts if the column is actually kW
-    return val
-
 
 def controller_multiple_cars(
    status, power_charging_port, storage_obj, money,
    time_step, battery_capacity, solar, wind,
    current_price, storage_capacity, grid_capacity,
    voltage, power_set_point, ev_caps, availability, charger_usage,
-   delta, constant_load_time, minute_offset, controller_settings,
+   delta, constant_load_time, controller_settings,
 ):
    """
    Main EMS logic for charging multiple EVs, handling energy flows, grid limits, and pricing.
@@ -98,7 +31,7 @@ def controller_multiple_cars(
 
 
    # Treat these state codes as "charging"
-   CHARGING_STATES = (1, 5)
+   CHARGING_STATES = 1
 
    # Normalize ev_caps to a list of ints (Wh)
    if isinstance(ev_caps, (int, float)):
@@ -131,13 +64,12 @@ def controller_multiple_cars(
 
 
    # ───── Determine who is charging this minute ─────
-   charging_indices = [i for i in range(n_ev) if status[i][time_step] in CHARGING_STATES]
+   charging_indices = [i for i in range(n_ev) if status[i][time_step] == CHARGING_STATES]
 
 
    # ───── Renewable power available (W) ─────
    P_total_produced = float(solar + wind)
 
-   print(constant_load_time)
 
    # ───── If no EVs are charging → price-based behavior ─────
    if not charging_indices:
@@ -169,7 +101,7 @@ def controller_multiple_cars(
            export_W = min(P_surplus, grid_capacity)
            E_grid_Wh = abs(export_W) * delta_t_h
            money += E_grid_Wh * current_price
-           return money, storage_obj, float(power_set_point), battery_capacity,0
+           return money, storage_obj, float(power_set_point), battery_capacity
 
 
        # Case 3: deficit, enough SoC → discharge storage
@@ -193,14 +125,14 @@ def controller_multiple_cars(
            money += E_grid_Wh * current_price  # export
 
 
-       return money, storage_obj, float(power_set_point), battery_capacity,0
+       return money, storage_obj, float(power_set_point), battery_capacity, 0
 
 
    P_const = float(constant_load_time)  # W (background/house load)
 
    # ───── Compute per‑EV requested power (W), limited by charger and per‑step room ─────
    P_ev_req_per_ev = []
-   P_port_car1 = 0
+
    for i in charging_indices:
        # which physical charger is this EV using at this minute?
        charger_num = int(charger_usage[i][time_step]) if charger_usage is not None else 0
@@ -210,13 +142,13 @@ def controller_multiple_cars(
        else:
            # 1-based to 0-based index; guard bounds
            idx = charger_num - 1
-           p_kw =  get_predicted_power_W_by_minute(charger_num, minute_offset)
-           P_port = float(p_kw) if p_kw is not None else 0.0
+           P_port = float(power_charging_port[idx])
 
        # keep (ev_index, requested_power_W)
        P_ev_req_per_ev.append((i, P_port))
-       if i == 0:
-            P_port_car1 = P_port
+       #if i == 0:
+           #print("EV 0 requests:", P_ev_req_per_ev)
+
 
 
 
@@ -308,4 +240,4 @@ def controller_multiple_cars(
        power_set_point = float(power_set_point[0])
 
 
-   return money, storage_obj, float(1000), battery_capacity, P_port_car1
+   return money, storage_obj, float(1000), battery_capacity, P_port

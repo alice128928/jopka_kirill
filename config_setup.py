@@ -1,4 +1,5 @@
 import streamlit as st
+import yaml
 
 
 def init_configs():
@@ -46,16 +47,14 @@ def load_config(name):
     st.session_state.price_high = sc["price_high"]
     st.session_state.price_low = sc["price_low"]
     st.session_state.add_load = sc["add_load"]
-    st.session_state.option = sc["option"]
-    st.session_state.option_1 = sc["option_1"]
+
     st.session_state.timestep = sc["timestep"]
-    st.session_state.options = sc["options"]
 
     st.session_state.config_name = name
 
 
 def save_config(turbines, solar_panels, ev_cars,
-                storage_capacity, grid_capacity, initial_money, price_high, price_low,add_load,option,option_1,timestep,options):
+                storage_capacity, grid_capacity, initial_money, price_high, price_low,add_load,timestep):
     # Gather all inputs
     cfg = {
         "turbines": turbines,
@@ -68,10 +67,7 @@ def save_config(turbines, solar_panels, ev_cars,
             "price_high": price_high,
             "price_low": price_low,
             "add_load": add_load,
-            "option": option,
-            "option_1": option_1,
             "timestep": timestep,
-            "options": options,
         }
     }
     name = st.session_state.config_name.strip()
@@ -80,6 +76,9 @@ def save_config(turbines, solar_panels, ev_cars,
         return
     st.session_state.configs[name] = cfg
     st.session_state.current_config = name
+    # save to yaml
+    with open(f"saved_configurations/{name}.yaml", "w") as f:
+        yaml.dump(cfg, f, default_flow_style=False, sort_keys=False)
     st.success(f"Configuration '{name}' saved.")
 
 

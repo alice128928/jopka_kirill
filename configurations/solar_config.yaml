@@ -1,10 +1,10 @@
 InitializationSettings:
   config_id: config 1
 solar_panels:
-- altitude: 0
-  inverter_id: ABB__MICRO_0_3_I_OUTD_US_208__208V_
-  latitude: 120.0
+- latitude: 120.0
   longitude: 120.0
-  module_id: Znshine_PV_Tech_ZXP6_72_295_P
-  number_of_panels: 1
+  altitude: 120
   surface_tilt: 30
+  number_of_panels: 1
+  inverter_id: ABB__MICRO_0_3_I_OUTD_US_208__208V_
+  module_id: Znshine_PV_Tech_ZXP6_72_295_P

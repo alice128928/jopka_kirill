@@ -4,7 +4,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 import yaml
 
-with open("configurations/controller_add_config.yaml", "r") as f:
+with open("../PythonProject9/configurations/controller_add_config.yaml", "r") as f:
     config_data = yaml.safe_load(f)
 
 configs = config_data["InitializationSettings"]["configs"][0]

@@ -1,15 +1,12 @@
 InitializationSettings:
   config_id: config 1
   configs:
-  - add_load: 10.0
-    grid_capacity: 10000.0
+  - storage_capacity: 10000.0
+    grid_capacity: 10000000.0
     initial_money: 10.0
-    option: Enter data manually
-    option_1: Enter data manually
-    options: ''
-    plot_car_id: A
-    plot_port: 1
     price_high: 0.07
     price_low: 0.01
-    storage_capacity: 6500.0
-    timestep: 1
+    add_load: 0.0
+    timestep: 60
+    plot_port: 1
+    plot_car_id: Vehicle#1

@@ -1,0 +1,23 @@
+InitializationSettings:
+  config_id: config 1
+ports:
+- port_id: 1
+  capacity_W: 250000.0
+- port_id: 2
+  capacity_W: 250000.0
+- port_id: 3
+  capacity_W: 500000.0
+- port_id: 4
+  capacity_W: 500000.0
+- port_id: 5
+  capacity_W: 500000.0
+- port_id: 6
+  capacity_W: 750000.0
+- port_id: 7
+  capacity_W: 750000.0
+- port_id: 8
+  capacity_W: 750000.0
+- port_id: 9
+  capacity_W: 1000000.0
+- port_id: 10
+  capacity_W: 1000000.0

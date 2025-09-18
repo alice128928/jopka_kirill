@@ -1,13 +1,1158 @@
 InitializationSettings:
-  cars:
-  - arrival_time: 02:00
-    battery_capacity: 25000.0
-    charging_port: 10000.0
-    departure_time: 03:00
-    id: A
-  - arrival_time: 05:00
-    battery_capacity: 250000.0
-    charging_port: 10000.0
-    departure_time: 08:00
-    id: B
   config_id: config 1
+  cars:
+  - id: Vehicle#1
+    battery_capacity: 270207.50694809604
+    charging_port: 1
+    arrival_date: '2025-08-06'
+    arrival_time: '10:38'
+    departure_date: '2025-08-06'
+    departure_time: '10:57'
+  - id: Vehicle#1
+    battery_capacity: 270207.50694809604
+    charging_port: 10
+    arrival_date: '2025-08-06'
+    arrival_time: '12:27'
+    departure_date: '2025-08-06'
+    departure_time: '12:35'
+  - id: Vehicle#1
+    battery_capacity: 270207.50694809604
+    charging_port: 10
+    arrival_date: '2025-08-06'
+    arrival_time: '15:05'
+    departure_date: '2025-08-06'
+    departure_time: '15:16'
+  - id: Vehicle#1
+    battery_capacity: 270207.50694809604
+    charging_port: 4
+    arrival_date: '2025-08-06'
+    arrival_time: '17:42'
+    departure_date: '2025-08-06'
+    departure_time: '18:02'
+  - id: Vehicle#1
+    battery_capacity: 270207.50694809604
+    charging_port: 1
+    arrival_date: '2025-08-06'
+    arrival_time: '22:42'
+    departure_date: '2025-08-06'
+    departure_time: '23:33'
+  - id: Vehicle#2
+    battery_capacity: 280740.764104378
+    charging_port: 2
+    arrival_date: '2025-08-06'
+    arrival_time: '10:33'
+    departure_date: '2025-08-06'
+    departure_time: '11:06'
+  - id: Vehicle#2
+    battery_capacity: 280740.764104378
+    charging_port: 8
+    arrival_date: '2025-08-06'
+    arrival_time: '13:44'
+    departure_date: '2025-08-06'
+    departure_time: '14:10'
+  - id: Vehicle#2
+    battery_capacity: 280740.764104378
+    charging_port: 10
+    arrival_date: '2025-08-06'
+    arrival_time: '16:28'
+    departure_date: '2025-08-06'
+    departure_time: '16:32'
+  - id: Vehicle#2
+    battery_capacity: 280740.764104378
+    charging_port: 8
+    arrival_date: '2025-08-06'
+    arrival_time: '18:38'
+    departure_date: '2025-08-06'
+    departure_time: '18:58'
+  - id: Vehicle#2
+    battery_capacity: 280740.764104378
+    charging_port: 8
+    arrival_date: '2025-08-07'
+    arrival_time: 03:34
+    departure_date: '2025-08-07'
+    departure_time: 04:00
+  - id: Vehicle#3
+    battery_capacity: 263548.876976646
+    charging_port: 5
+    arrival_date: '2025-08-06'
+    arrival_time: '10:27'
+    departure_date: '2025-08-06'
+    departure_time: '10:44'
+  - id: Vehicle#3
+    battery_capacity: 263548.876976646
+    charging_port: 4
+    arrival_date: '2025-08-06'
+    arrival_time: '13:39'
+    departure_date: '2025-08-06'
+    departure_time: '14:09'
+  - id: Vehicle#3
+    battery_capacity: 263548.876976646
+    charging_port: 8
+    arrival_date: '2025-08-06'
+    arrival_time: '15:45'
+    departure_date: '2025-08-06'
+    departure_time: '15:58'
+  - id: Vehicle#3
+    battery_capacity: 263548.876976646
+    charging_port: 7
+    arrival_date: '2025-08-06'
+    arrival_time: '19:08'
+    departure_date: '2025-08-06'
+    departure_time: '19:21'
+  - id: Vehicle#3
+    battery_capacity: 263548.876976646
+    charging_port: 2
+    arrival_date: '2025-08-06'
+    arrival_time: '22:50'
+    departure_date: '2025-08-06'
+    departure_time: '23:40'
+  - id: Vehicle#4
+    battery_capacity: 293879.87382090604
+    charging_port: 10
+    arrival_date: '2025-08-06'
+    arrival_time: '10:52'
+    departure_date: '2025-08-06'
+    departure_time: '10:58'
+  - id: Vehicle#4
+    battery_capacity: 293879.87382090604
+    charging_port: 7
+    arrival_date: '2025-08-06'
+    arrival_time: '14:06'
+    departure_date: '2025-08-06'
+    departure_time: '14:20'
+  - id: Vehicle#4
+    battery_capacity: 293879.87382090604
+    charging_port: 5
+    arrival_date: '2025-08-06'
+    arrival_time: '17:07'
+    departure_date: '2025-08-06'
+    departure_time: '17:30'
+  - id: Vehicle#4
+    battery_capacity: 293879.87382090604
+    charging_port: 4
+    arrival_date: '2025-08-07'
+    arrival_time: 01:56
+    departure_date: '2025-08-07'
+    departure_time: 02:52
+  - id: Vehicle#5
+    battery_capacity: 285950.532511825
+    charging_port: 2
+    arrival_date: '2025-08-06'
+    arrival_time: 09:57
+    departure_date: '2025-08-06'
+    departure_time: '10:12'
+  - id: Vehicle#5
+    battery_capacity: 285950.532511825
+    charging_port: 1
+    arrival_date: '2025-08-06'
+    arrival_time: '12:09'
+    departure_date: '2025-08-06'
+    departure_time: '12:52'
+  - id: Vehicle#5
+    battery_capacity: 285950.532511825
+    charging_port: 1
+    arrival_date: '2025-08-06'
+    arrival_time: '15:29'
+    departure_date: '2025-08-06'
+    departure_time: '16:16'
+  - id: Vehicle#5
+    battery_capacity: 285950.532511825
+    charging_port: 2
+    arrival_date: '2025-08-06'
+    arrival_time: '18:53'
+    departure_date: '2025-08-06'
+    departure_time: '19:34'
+  - id: Vehicle#5
+    battery_capacity: 285950.532511825
+    charging_port: 9
+    arrival_date: '2025-08-07'
+    arrival_time: 05:14
+    departure_date: '2025-08-07'
+    departure_time: 05:27
+  - id: Vehicle#6
+    battery_capacity: 273253.69099662
+    charging_port: 1
+    arrival_date: '2025-08-06'
+    arrival_time: 09:20
+    departure_date: '2025-08-06'
+    departure_time: 09:40
+  - id: Vehicle#6
+    battery_capacity: 273253.69099662
+    charging_port: 2
+    arrival_date: '2025-08-06'
+    arrival_time: '12:26'
+    departure_date: '2025-08-06'
+    departure_time: '12:56'
+  - id: Vehicle#6
+    battery_capacity: 273253.69099662
+    charging_port: 1
+    arrival_date: '2025-08-06'
+    arrival_time: '14:35'
+    departure_date: '2025-08-06'
+    departure_time: '15:14'
+  - id: Vehicle#6
+    battery_capacity: 273253.69099662
+    charging_port: 2
+    arrival_date: '2025-08-06'
+    arrival_time: '17:30'
+    departure_date: '2025-08-06'
+    departure_time: '17:59'
+  - id: Vehicle#6
+    battery_capacity: 273253.69099662
+    charging_port: 3
+    arrival_date: '2025-08-07'
+    arrival_time: 00:53
+    departure_date: '2025-08-07'
+    departure_time: 01:45
+  - id: Vehicle#7
+    battery_capacity: 273120.02474705
+    charging_port: 3
+    arrival_date: '2025-08-06'
+    arrival_time: '10:49'
+    departure_date: '2025-08-06'
+    departure_time: '11:11'
+  - id: Vehicle#7
+    battery_capacity: 273120.02474705
+    charging_port: 4
+    arrival_date: '2025-08-06'
+    arrival_time: '13:07'
+    departure_date: '2025-08-06'
+    departure_time: '13:24'
+  - id: Vehicle#7
+    battery_capacity: 273120.02474705
+    charging_port: 2
+    arrival_date: '2025-08-06'
+    arrival_time: '15:15'
+    departure_date: '2025-08-06'
+    departure_time: '15:54'
+  - id: Vehicle#7
+    battery_capacity: 273120.02474705
+    charging_port: 2
+    arrival_date: '2025-08-06'
+    arrival_time: '18:11'
+    departure_date: '2025-08-06'
+    departure_time: '18:44'
+  - id: Vehicle#7
+    battery_capacity: 273120.02474705
+    charging_port: 4
+    arrival_date: '2025-08-07'
+    arrival_time: 01:02
+    departure_date: '2025-08-07'
+    departure_time: 01:54
+  - id: Vehicle#8
+    battery_capacity: 275526.184209617
+    charging_port: 9
+    arrival_date: '2025-08-06'
+    arrival_time: 09:43
+    departure_date: '2025-08-06'
+    departure_time: 09:44
+  - id: Vehicle#8
+    battery_capacity: 275526.184209617
+    charging_port: 2
+    arrival_date: '2025-08-06'
+    arrival_time: '11:34'
+    departure_date: '2025-08-06'
+    departure_time: '12:13'
+  - id: Vehicle#8
+    battery_capacity: 275526.184209617
+    charging_port: 8
+    arrival_date: '2025-08-06'
+    arrival_time: '14:54'
+    departure_date: '2025-08-06'
+    departure_time: '15:17'
+  - id: Vehicle#8
+    battery_capacity: 275526.184209617
+    charging_port: 4
+    arrival_date: '2025-08-06'
+    arrival_time: '18:08'
+    departure_date: '2025-08-06'
+    departure_time: '18:32'
+  - id: Vehicle#8
+    battery_capacity: 275526.184209617
+    charging_port: 10
+    arrival_date: '2025-08-07'
+    arrival_time: 05:16
+    departure_date: '2025-08-07'
+    departure_time: 05:29
+  - id: Vehicle#9
+    battery_capacity: 243866.035572378
+    charging_port: 4
+    arrival_date: '2025-08-06'
+    arrival_time: '10:06'
+    departure_date: '2025-08-06'
+    departure_time: '10:36'
+  - id: Vehicle#9
+    battery_capacity: 243866.035572378
+    charging_port: 6
+    arrival_date: '2025-08-06'
+    arrival_time: '12:47'
+    departure_date: '2025-08-06'
+    departure_time: '12:56'
+  - id: Vehicle#9
+    battery_capacity: 243866.035572378
+    charging_port: 9
+    arrival_date: '2025-08-06'
+    arrival_time: '15:10'
+    departure_date: '2025-08-06'
+    departure_time: '15:17'
+  - id: Vehicle#9
+    battery_capacity: 243866.035572378
+    charging_port: 2
+    arrival_date: '2025-08-06'
+    arrival_time: '16:39'
+    departure_date: '2025-08-06'
+    departure_time: '17:11'
+  - id: Vehicle#9
+    battery_capacity: 243866.035572378
+    charging_port: 1
+    arrival_date: '2025-08-06'
+    arrival_time: '18:49'
+    departure_date: '2025-08-06'
+    departure_time: '19:20'
+  - id: Vehicle#9
+    battery_capacity: 243866.035572378
+    charging_port: 6
+    arrival_date: '2025-08-07'
+    arrival_time: 04:46
+    departure_date: '2025-08-07'
+    departure_time: 05:01
+  - id: Vehicle#10
+    battery_capacity: 258289.32766458302
+    charging_port: 6
+    arrival_date: '2025-08-06'
+    arrival_time: '10:40'
+    departure_date: '2025-08-06'
+    departure_time: '10:47'
+  - id: Vehicle#10
+    battery_capacity: 258289.32766458302
+    charging_port: 6
+    arrival_date: '2025-08-06'
+    arrival_time: '13:20'
+    departure_date: '2025-08-06'
+    departure_time: '13:33'
+  - id: Vehicle#10
+    battery_capacity: 258289.32766458302
+    charging_port: 9
+    arrival_date: '2025-08-06'
+    arrival_time: '15:50'
+    departure_date: '2025-08-06'
+    departure_time: '15:57'
+  - id: Vehicle#10
+    battery_capacity: 258289.32766458302
+    charging_port: 5
+    arrival_date: '2025-08-06'
+    arrival_time: '18:53'
+    departure_date: '2025-08-06'
+    departure_time: '19:14'
+  - id: Vehicle#10
+    battery_capacity: 258289.32766458302
+    charging_port: 5
+    arrival_date: '2025-08-07'
+    arrival_time: 04:01
+    departure_date: '2025-08-07'
+    departure_time: 04:25
+  - id: Vehicle#11
+    battery_capacity: 388920.016662625
+    charging_port: 1
+    arrival_date: '2025-08-06'
+    arrival_time: '11:29'
+    departure_date: '2025-08-06'
+    departure_time: '12:02'
+  - id: Vehicle#11
+    battery_capacity: 388920.016662625
+    charging_port: 2
+    arrival_date: '2025-08-06'
+    arrival_time: '14:17'
+    departure_date: '2025-08-06'
+    departure_time: '15:00'
+  - id: Vehicle#11
+    battery_capacity: 388920.016662625
+    charging_port: 8
+    arrival_date: '2025-08-06'
+    arrival_time: '17:39'
+    departure_date: '2025-08-06'
+    departure_time: '17:55'
+  - id: Vehicle#11
+    battery_capacity: 388920.016662625
+    charging_port: 1
+    arrival_date: '2025-08-07'
+    arrival_time: 00:41
+    departure_date: '2025-08-07'
+    departure_time: 01:55
+  - id: Vehicle#12
+    battery_capacity: 362821.498119132
+    charging_port: 6
+    arrival_date: '2025-08-06'
+    arrival_time: '10:29'
+    departure_date: '2025-08-06'
+    departure_time: '10:38'
+  - id: Vehicle#12
+    battery_capacity: 362821.498119132
+    charging_port: 7
+    arrival_date: '2025-08-06'
+    arrival_time: '14:45'
+    departure_date: '2025-08-06'
+    departure_time: '15:00'
+  - id: Vehicle#12
+    battery_capacity: 362821.498119132
+    charging_port: 4
+    arrival_date: '2025-08-07'
+    arrival_time: 02:54
+    departure_date: '2025-08-07'
+    departure_time: 04:03
+  - id: Vehicle#13
+    battery_capacity: 389737.74031977396
+    charging_port: 4
+    arrival_date: '2025-08-06'
+    arrival_time: '11:39'
+    departure_date: '2025-08-06'
+    departure_time: '11:58'
+  - id: Vehicle#13
+    battery_capacity: 389737.74031977396
+    charging_port: 7
+    arrival_date: '2025-08-06'
+    arrival_time: '15:43'
+    departure_date: '2025-08-06'
+    departure_time: '16:07'
+  - id: Vehicle#13
+    battery_capacity: 389737.74031977396
+    charging_port: 2
+    arrival_date: '2025-08-07'
+    arrival_time: 00:47
+    departure_date: '2025-08-07'
+    departure_time: 02:01
+  - id: Vehicle#14
+    battery_capacity: 376275.516281285
+    charging_port: 4
+    arrival_date: '2025-08-06'
+    arrival_time: '10:54'
+    departure_date: '2025-08-06'
+    departure_time: '11:37'
+  - id: Vehicle#14
+    battery_capacity: 376275.516281285
+    charging_port: 7
+    arrival_date: '2025-08-06'
+    arrival_time: '15:02'
+    departure_date: '2025-08-06'
+    departure_time: '15:21'
+  - id: Vehicle#14
+    battery_capacity: 376275.516281285
+    charging_port: 7
+    arrival_date: '2025-08-06'
+    arrival_time: '18:12'
+    departure_date: '2025-08-06'
+    departure_time: '18:36'
+  - id: Vehicle#15
+    battery_capacity: 373503.084910532
+    charging_port: 8
+    arrival_date: '2025-08-06'
+    arrival_time: '11:30'
+    departure_date: '2025-08-06'
+    departure_time: '11:47'
+  - id: Vehicle#15
+    battery_capacity: 373503.084910532
+    charging_port: 5
+    arrival_date: '2025-08-06'
+    arrival_time: '15:21'
+    departure_date: '2025-08-06'
+    departure_time: '15:44'
+  - id: Vehicle#15
+    battery_capacity: 373503.084910532
+    charging_port: 6
+    arrival_date: '2025-08-06'
+    arrival_time: '18:19'
+    departure_date: '2025-08-06'
+    departure_time: '18:34'
+  - id: Vehicle#15
+    battery_capacity: 373503.084910532
+    charging_port: 3
+    arrival_date: '2025-08-07'
+    arrival_time: 02:51
+    departure_date: '2025-08-07'
+    departure_time: 04:02
+  - id: Vehicle#16
+    battery_capacity: 358594.20454772195
+    charging_port: 3
+    arrival_date: '2025-08-06'
+    arrival_time: '11:41'
+    departure_date: '2025-08-06'
+    departure_time: '12:10'
+  - id: Vehicle#16
+    battery_capacity: 358594.20454772195
+    charging_port: 3
+    arrival_date: '2025-08-06'
+    arrival_time: '15:02'
+    departure_date: '2025-08-06'
+    departure_time: '15:25'
+  - id: Vehicle#16
+    battery_capacity: 358594.20454772195
+    charging_port: 4
+    arrival_date: '2025-08-06'
+    arrival_time: '18:45'
+    departure_date: '2025-08-06'
+    departure_time: '19:09'
+  - id: Vehicle#16
+    battery_capacity: 358594.20454772195
+    charging_port: 5
+    arrival_date: '2025-08-07'
+    arrival_time: 04:57
+    departure_date: '2025-08-07'
+    departure_time: 05:31
+  - id: Vehicle#17
+    battery_capacity: 393051.511433189
+    charging_port: 5
+    arrival_date: '2025-08-06'
+    arrival_time: '12:38'
+    departure_date: '2025-08-06'
+    departure_time: '13:04'
+  - id: Vehicle#17
+    battery_capacity: 393051.511433189
+    charging_port: 1
+    arrival_date: '2025-08-06'
+    arrival_time: '17:04'
+    departure_date: '2025-08-06'
+    departure_time: '17:50'
+  - id: Vehicle#17
+    battery_capacity: 393051.511433189
+    charging_port: 6
+    arrival_date: '2025-08-07'
+    arrival_time: 05:47
+    departure_date: '2025-08-07'
+    departure_time: 06:12
+  - id: Vehicle#18
+    battery_capacity: 350789.392502878
+    charging_port: 9
+    arrival_date: '2025-08-06'
+    arrival_time: '11:28'
+    departure_date: '2025-08-06'
+    departure_time: '11:37'
+  - id: Vehicle#18
+    battery_capacity: 350789.392502878
+    charging_port: 9
+    arrival_date: '2025-08-06'
+    arrival_time: '15:25'
+    departure_date: '2025-08-06'
+    departure_time: '15:34'
+  - id: Vehicle#18
+    battery_capacity: 350789.392502878
+    charging_port: 5
+    arrival_date: '2025-08-06'
+    arrival_time: '18:28'
+    departure_date: '2025-08-06'
+    departure_time: '18:50'
+  - id: Vehicle#18
+    battery_capacity: 350789.392502878
+    charging_port: 9
+    arrival_date: '2025-08-07'
+    arrival_time: 05:29
+    departure_date: '2025-08-07'
+    departure_time: 05:45
+  - id: Vehicle#19
+    battery_capacity: 403004.84728096804
+    charging_port: 7
+    arrival_date: '2025-08-06'
+    arrival_time: '11:19'
+    departure_date: '2025-08-06'
+    departure_time: '11:32'
+  - id: Vehicle#19
+    battery_capacity: 403004.84728096804
+    charging_port: 3
+    arrival_date: '2025-08-06'
+    arrival_time: '17:14'
+    departure_date: '2025-08-06'
+    departure_time: '17:42'
+  - id: Vehicle#19
+    battery_capacity: 403004.84728096804
+    charging_port: 8
+    arrival_date: '2025-08-07'
+    arrival_time: 04:38
+    departure_date: '2025-08-07'
+    departure_time: 05:16
+  - id: Vehicle#20
+    battery_capacity: 345512.185351621
+    charging_port: 7
+    arrival_date: '2025-08-06'
+    arrival_time: '11:34'
+    departure_date: '2025-08-06'
+    departure_time: '11:43'
+  - id: Vehicle#20
+    battery_capacity: 345512.185351621
+    charging_port: 4
+    arrival_date: '2025-08-06'
+    arrival_time: '14:12'
+    departure_date: '2025-08-06'
+    departure_time: '14:32'
+  - id: Vehicle#20
+    battery_capacity: 345512.185351621
+    charging_port: 1
+    arrival_date: '2025-08-06'
+    arrival_time: '17:58'
+    departure_date: '2025-08-06'
+    departure_time: '18:44'
+  - id: Vehicle#20
+    battery_capacity: 345512.185351621
+    charging_port: 10
+    arrival_date: '2025-08-07'
+    arrival_time: 05:31
+    departure_date: '2025-08-07'
+    departure_time: 05:47
+  - id: Vehicle#21
+    battery_capacity: 352321.035001185
+    charging_port: 10
+    arrival_date: '2025-08-06'
+    arrival_time: '10:40'
+    departure_date: '2025-08-06'
+    departure_time: '10:50'
+  - id: Vehicle#21
+    battery_capacity: 352321.035001185
+    charging_port: 9
+    arrival_date: '2025-08-06'
+    arrival_time: '15:40'
+    departure_date: '2025-08-06'
+    departure_time: '15:48'
+  - id: Vehicle#21
+    battery_capacity: 352321.035001185
+    charging_port: 5
+    arrival_date: '2025-08-06'
+    arrival_time: '17:37'
+    departure_date: '2025-08-06'
+    departure_time: '18:06'
+  - id: Vehicle#21
+    battery_capacity: 352321.035001185
+    charging_port: 6
+    arrival_date: '2025-08-07'
+    arrival_time: 05:23
+    departure_date: '2025-08-07'
+    departure_time: 05:45
+  - id: Vehicle#22
+    battery_capacity: 358302.63243524596
+    charging_port: 3
+    arrival_date: '2025-08-06'
+    arrival_time: '10:09'
+    departure_date: '2025-08-06'
+    departure_time: '10:17'
+  - id: Vehicle#22
+    battery_capacity: 358302.63243524596
+    charging_port: 3
+    arrival_date: '2025-08-06'
+    arrival_time: '12:57'
+    departure_date: '2025-08-06'
+    departure_time: '13:17'
+  - id: Vehicle#22
+    battery_capacity: 358302.63243524596
+    charging_port: 6
+    arrival_date: '2025-08-06'
+    arrival_time: '15:38'
+    departure_date: '2025-08-06'
+    departure_time: '15:57'
+  - id: Vehicle#22
+    battery_capacity: 358302.63243524596
+    charging_port: 8
+    arrival_date: '2025-08-07'
+    arrival_time: 04:02
+    departure_date: '2025-08-07'
+    departure_time: 04:36
+  - id: Vehicle#23
+    battery_capacity: 333793.252492122
+    charging_port: 5
+    arrival_date: '2025-08-06'
+    arrival_time: '11:28'
+    departure_date: '2025-08-06'
+    departure_time: '11:42'
+  - id: Vehicle#23
+    battery_capacity: 333793.252492122
+    charging_port: 3
+    arrival_date: '2025-08-06'
+    arrival_time: '14:27'
+    departure_date: '2025-08-06'
+    departure_time: '14:45'
+  - id: Vehicle#23
+    battery_capacity: 333793.252492122
+    charging_port: 8
+    arrival_date: '2025-08-06'
+    arrival_time: '17:12'
+    departure_date: '2025-08-06'
+    departure_time: '17:36'
+  - id: Vehicle#23
+    battery_capacity: 333793.252492122
+    charging_port: 1
+    arrival_date: '2025-08-06'
+    arrival_time: '23:35'
+    departure_date: '2025-08-07'
+    departure_time: 00:39
+  - id: Vehicle#24
+    battery_capacity: 398867.55460390996
+    charging_port: 4
+    arrival_date: '2025-08-06'
+    arrival_time: '12:00'
+    departure_date: '2025-08-06'
+    departure_time: '12:24'
+  - id: Vehicle#24
+    battery_capacity: 398867.55460390996
+    charging_port: 10
+    arrival_date: '2025-08-06'
+    arrival_time: '15:29'
+    departure_date: '2025-08-06'
+    departure_time: '15:44'
+  - id: Vehicle#24
+    battery_capacity: 398867.55460390996
+    charging_port: 9
+    arrival_date: '2025-08-07'
+    arrival_time: 05:47
+    departure_date: '2025-08-07'
+    departure_time: 06:06
+  - id: Vehicle#25
+    battery_capacity: 399058.917075141
+    charging_port: 10
+    arrival_date: '2025-08-06'
+    arrival_time: '12:37'
+    departure_date: '2025-08-06'
+    departure_time: '12:46'
+  - id: Vehicle#25
+    battery_capacity: 399058.917075141
+    charging_port: 4
+    arrival_date: '2025-08-06'
+    arrival_time: '17:01'
+    departure_date: '2025-08-06'
+    departure_time: '17:36'
+  - id: Vehicle#25
+    battery_capacity: 399058.917075141
+    charging_port: 10
+    arrival_date: '2025-08-07'
+    arrival_time: 05:49
+    departure_date: '2025-08-07'
+    departure_time: 06:08
+  - id: Vehicle#26
+    battery_capacity: 480420.719277577
+    charging_port: 8
+    arrival_date: '2025-08-06'
+    arrival_time: '12:23'
+    departure_date: '2025-08-06'
+    departure_time: '12:50'
+  - id: Vehicle#26
+    battery_capacity: 480420.719277577
+    charging_port: 7
+    arrival_date: '2025-08-06'
+    arrival_time: '17:36'
+    departure_date: '2025-08-06'
+    departure_time: '18:00'
+  - id: Vehicle#26
+    battery_capacity: 480420.719277577
+    charging_port: 4
+    arrival_date: '2025-08-07'
+    arrival_time: 05:27
+    departure_date: '2025-08-07'
+    departure_time: 06:59
+  - id: Vehicle#27
+    battery_capacity: 475145.00695159304
+    charging_port: 8
+    arrival_date: '2025-08-06'
+    arrival_time: '12:55'
+    departure_date: '2025-08-06'
+    departure_time: '13:15'
+  - id: Vehicle#27
+    battery_capacity: 475145.00695159304
+    charging_port: 5
+    arrival_date: '2025-08-07'
+    arrival_time: 06:14
+    departure_date: '2025-08-07'
+    departure_time: 06:59
+  - id: Vehicle#28
+    battery_capacity: 455521.12571804505
+    charging_port: 5
+    arrival_date: '2025-08-06'
+    arrival_time: '12:11'
+    departure_date: '2025-08-06'
+    departure_time: '12:35'
+  - id: Vehicle#28
+    battery_capacity: 455521.12571804505
+    charging_port: 3
+    arrival_date: '2025-08-06'
+    arrival_time: '17:47'
+    departure_date: '2025-08-06'
+    departure_time: '18:30'
+  - id: Vehicle#28
+    battery_capacity: 455521.12571804505
+    charging_port: 2
+    arrival_date: '2025-08-06'
+    arrival_time: '23:42'
+    departure_date: '2025-08-07'
+    departure_time: 00:45
+  - id: Vehicle#29
+    battery_capacity: 503760.494029052
+    charging_port: 5
+    arrival_date: '2025-08-06'
+    arrival_time: '13:06'
+    departure_date: '2025-08-06'
+    departure_time: '13:42'
+  - id: Vehicle#29
+    battery_capacity: 503760.494029052
+    charging_port: 5
+    arrival_date: '2025-08-07'
+    arrival_time: 04:27
+    departure_date: '2025-08-07'
+    departure_time: 04:55
+  - id: Vehicle#30
+    battery_capacity: 442467.290591953
+    charging_port: 7
+    arrival_date: '2025-08-06'
+    arrival_time: '12:32'
+    departure_date: '2025-08-06'
+    departure_time: '12:48'
+  - id: Vehicle#30
+    battery_capacity: 442467.290591953
+    charging_port: 9
+    arrival_date: '2025-08-06'
+    arrival_time: '17:02'
+    departure_date: '2025-08-06'
+    departure_time: '17:14'
+  - id: Vehicle#30
+    battery_capacity: 442467.290591953
+    charging_port: 2
+    arrival_date: '2025-08-07'
+    arrival_time: 02:03
+    departure_date: '2025-08-07'
+    departure_time: 03:27
+  - id: Vehicle#31
+    battery_capacity: 443475.493216373
+    charging_port: 8
+    arrival_date: '2025-08-06'
+    arrival_time: '10:39'
+    departure_date: '2025-08-06'
+    departure_time: '10:52'
+  - id: Vehicle#31
+    battery_capacity: 443475.493216373
+    charging_port: 6
+    arrival_date: '2025-08-06'
+    arrival_time: '15:14'
+    departure_date: '2025-08-06'
+    departure_time: '15:36'
+  - id: Vehicle#31
+    battery_capacity: 443475.493216373
+    charging_port: 10
+    arrival_date: '2025-08-07'
+    arrival_time: 06:10
+    departure_date: '2025-08-07'
+    departure_time: 06:31
+  - id: Vehicle#32
+    battery_capacity: 450210.840993279
+    charging_port: 3
+    arrival_date: '2025-08-06'
+    arrival_time: '13:41'
+    departure_date: '2025-08-06'
+    departure_time: '14:11'
+  - id: Vehicle#32
+    battery_capacity: 450210.840993279
+    charging_port: 7
+    arrival_date: '2025-08-06'
+    arrival_time: '18:38'
+    departure_date: '2025-08-06'
+    departure_time: '19:06'
+  - id: Vehicle#33
+    battery_capacity: 515392.917241213
+    charging_port: 9
+    arrival_date: '2025-08-06'
+    arrival_time: '11:13'
+    departure_date: '2025-08-06'
+    departure_time: '11:26'
+  - id: Vehicle#33
+    battery_capacity: 515392.917241213
+    charging_port: 7
+    arrival_date: '2025-08-06'
+    arrival_time: '17:14'
+    departure_date: '2025-08-06'
+    departure_time: '17:34'
+  - id: Vehicle#34
+    battery_capacity: 485588.706059451
+    charging_port: 9
+    arrival_date: '2025-08-06'
+    arrival_time: '11:39'
+    departure_date: '2025-08-06'
+    departure_time: '11:44'
+  - id: Vehicle#34
+    battery_capacity: 485588.706059451
+    charging_port: 10
+    arrival_date: '2025-08-06'
+    arrival_time: '14:41'
+    departure_date: '2025-08-06'
+    departure_time: '15:02'
+  - id: Vehicle#34
+    battery_capacity: 485588.706059451
+    charging_port: 3
+    arrival_date: '2025-08-07'
+    arrival_time: 05:26
+    departure_date: '2025-08-07'
+    departure_time: 06:59
+  - id: Vehicle#35
+    battery_capacity: 458484.71708758303
+    charging_port: 10
+    arrival_date: '2025-08-06'
+    arrival_time: '12:22'
+    departure_date: '2025-08-06'
+    departure_time: '12:25'
+  - id: Vehicle#35
+    battery_capacity: 458484.71708758303
+    charging_port: 6
+    arrival_date: '2025-08-06'
+    arrival_time: '17:22'
+    departure_date: '2025-08-06'
+    departure_time: '17:40'
+  - id: Vehicle#35
+    battery_capacity: 458484.71708758303
+    charging_port: 8
+    arrival_date: '2025-08-07'
+    arrival_time: 05:18
+    departure_date: '2025-08-07'
+    departure_time: 06:02
+  - id: Vehicle#36
+    battery_capacity: 469705.076642541
+    charging_port: 6
+    arrival_date: '2025-08-06'
+    arrival_time: '12:27'
+    departure_date: '2025-08-06'
+    departure_time: '12:36'
+  - id: Vehicle#36
+    battery_capacity: 469705.076642541
+    charging_port: 7
+    arrival_date: '2025-08-06'
+    arrival_time: '15:23'
+    departure_date: '2025-08-06'
+    departure_time: '15:41'
+  - id: Vehicle#36
+    battery_capacity: 469705.076642541
+    charging_port: 6
+    arrival_date: '2025-08-07'
+    arrival_time: 06:14
+    departure_date: '2025-08-07'
+    departure_time: 06:59
+  - id: Vehicle#37
+    battery_capacity: 463267.77464465
+    charging_port: 7
+    arrival_date: '2025-08-06'
+    arrival_time: '12:50'
+    departure_date: '2025-08-06'
+    departure_time: '12:59'
+  - id: Vehicle#37
+    battery_capacity: 463267.77464465
+    charging_port: 10
+    arrival_date: '2025-08-06'
+    arrival_time: '15:47'
+    departure_date: '2025-08-06'
+    departure_time: '16:02'
+  - id: Vehicle#37
+    battery_capacity: 463267.77464465
+    charging_port: 9
+    arrival_date: '2025-08-07'
+    arrival_time: 06:08
+    departure_date: '2025-08-07'
+    departure_time: 06:30
+  - id: Vehicle#38
+    battery_capacity: 420684.394878033
+    charging_port: 1
+    arrival_date: '2025-08-06'
+    arrival_time: '12:56'
+    departure_date: '2025-08-06'
+    departure_time: '13:40'
+  - id: Vehicle#38
+    battery_capacity: 420684.394878033
+    charging_port: 6
+    arrival_date: '2025-08-06'
+    arrival_time: '18:36'
+    departure_date: '2025-08-06'
+    departure_time: '18:53'
+  - id: Vehicle#38
+    battery_capacity: 420684.394878033
+    charging_port: 3
+    arrival_date: '2025-08-07'
+    arrival_time: 04:04
+    departure_date: '2025-08-07'
+    departure_time: 05:24
+  - id: Vehicle#39
+    battery_capacity: 501208.142484361
+    charging_port: 9
+    arrival_date: '2025-08-06'
+    arrival_time: '13:57'
+    departure_date: '2025-08-06'
+    departure_time: '14:09'
+  - id: Vehicle#39
+    battery_capacity: 501208.142484361
+    charging_port: 3
+    arrival_date: '2025-08-06'
+    arrival_time: '18:43'
+    departure_date: '2025-08-06'
+    departure_time: '18:55'
+  - id: Vehicle#39
+    battery_capacity: 501208.142484361
+    charging_port: 1
+    arrival_date: '2025-08-07'
+    arrival_time: 03:25
+    departure_date: '2025-08-07'
+    departure_time: 05:01
+  - id: Vehicle#40
+    battery_capacity: 451154.129282649
+    charging_port: 7
+    arrival_date: '2025-08-06'
+    arrival_time: '10:40'
+    departure_date: '2025-08-06'
+    departure_time: '10:46'
+  - id: Vehicle#40
+    battery_capacity: 451154.129282649
+    charging_port: 6
+    arrival_date: '2025-08-06'
+    arrival_time: '14:04'
+    departure_date: '2025-08-06'
+    departure_time: '14:24'
+  - id: Vehicle#40
+    battery_capacity: 451154.129282649
+    charging_port: 10
+    arrival_date: '2025-08-06'
+    arrival_time: '17:43'
+    departure_date: '2025-08-06'
+    departure_time: '17:57'
+  - id: Vehicle#40
+    battery_capacity: 451154.129282649
+    charging_port: 1
+    arrival_date: '2025-08-07'
+    arrival_time: 01:57
+    departure_date: '2025-08-07'
+    departure_time: 03:23
+  - id: Vehicle#41
+    battery_capacity: 557195.861857255
+    charging_port: 9
+    arrival_date: '2025-08-06'
+    arrival_time: '13:48'
+    departure_date: '2025-08-06'
+    departure_time: '13:55'
+  - id: Vehicle#41
+    battery_capacity: 557195.861857255
+    charging_port: 10
+    arrival_date: '2025-08-07'
+    arrival_time: 06:33
+    departure_date: '2025-08-07'
+    departure_time: 06:59
+  - id: Vehicle#42
+    battery_capacity: 570736.0311687259
+    charging_port: 8
+    arrival_date: '2025-08-06'
+    arrival_time: '13:18'
+    departure_date: '2025-08-06'
+    departure_time: '13:42'
+  - id: Vehicle#42
+    battery_capacity: 570736.0311687259
+    charging_port: 9
+    arrival_date: '2025-08-07'
+    arrival_time: 06:32
+    departure_date: '2025-08-07'
+    departure_time: 06:59
+  - id: Vehicle#43
+    battery_capacity: 605889.720195332
+    charging_port: 5
+    arrival_date: '2025-08-06'
+    arrival_time: '14:46'
+    departure_date: '2025-08-06'
+    departure_time: '15:10'
+  - id: Vehicle#43
+    battery_capacity: 605889.720195332
+    charging_port: 1
+    arrival_date: '2025-08-07'
+    arrival_time: 05:03
+    departure_date: '2025-08-07'
+    departure_time: 06:59
+  - id: Vehicle#44
+    battery_capacity: 506976.098196515
+    charging_port: 3
+    arrival_date: '2025-08-06'
+    arrival_time: '12:12'
+    departure_date: '2025-08-06'
+    departure_time: '12:53'
+  - id: Vehicle#44
+    battery_capacity: 506976.098196515
+    charging_port: 2
+    arrival_date: '2025-08-07'
+    arrival_time: 03:29
+    departure_date: '2025-08-07'
+    departure_time: 05:06
+  - id: Vehicle#45
+    battery_capacity: 565288.134523551
+    charging_port: 3
+    arrival_date: '2025-08-06'
+    arrival_time: '15:27'
+    departure_date: '2025-08-06'
+    departure_time: '16:06'
+  - id: Vehicle#45
+    battery_capacity: 565288.134523551
+    charging_port: 4
+    arrival_date: '2025-08-07'
+    arrival_time: 04:05
+    departure_date: '2025-08-07'
+    departure_time: 05:25
+  - id: Vehicle#46
+    battery_capacity: 594711.668934722
+    charging_port: 5
+    arrival_date: '2025-08-06'
+    arrival_time: '13:54'
+    departure_date: '2025-08-06'
+    departure_time: '14:27'
+  - id: Vehicle#46
+    battery_capacity: 594711.668934722
+    charging_port: 5
+    arrival_date: '2025-08-07'
+    arrival_time: 05:33
+    departure_date: '2025-08-07'
+    departure_time: 06:12
+  - id: Vehicle#47
+    battery_capacity: 582104.588112847
+    charging_port: 2
+    arrival_date: '2025-08-06'
+    arrival_time: '13:07'
+    departure_date: '2025-08-06'
+    departure_time: '13:43'
+  - id: Vehicle#47
+    battery_capacity: 582104.588112847
+    charging_port: 2
+    arrival_date: '2025-08-07'
+    arrival_time: 05:08
+    departure_date: '2025-08-07'
+    departure_time: 06:59
+  - id: Vehicle#48
+    battery_capacity: 578230.436668509
+    charging_port: 6
+    arrival_date: '2025-08-06'
+    arrival_time: '13:00'
+    departure_date: '2025-08-06'
+    departure_time: '13:18'
+  - id: Vehicle#48
+    battery_capacity: 578230.436668509
+    charging_port: 6
+    arrival_date: '2025-08-07'
+    arrival_time: 05:03
+    departure_date: '2025-08-07'
+    departure_time: 05:21
+  - id: Vehicle#49
+    battery_capacity: 591433.697424187
+    charging_port: 4
+    arrival_date: '2025-08-06'
+    arrival_time: '14:34'
+    departure_date: '2025-08-06'
+    departure_time: '15:21'
+  - id: Vehicle#49
+    battery_capacity: 591433.697424187
+    charging_port: 3
+    arrival_date: '2025-08-07'
+    arrival_time: 01:47
+    departure_date: '2025-08-07'
+    departure_time: 02:49
+  - id: Vehicle#50
+    battery_capacity: 576658.132835649
+    charging_port: 1
+    arrival_date: '2025-08-06'
+    arrival_time: '13:59'
+    departure_date: '2025-08-06'
+    departure_time: '14:27'
+  - id: Vehicle#50
+    battery_capacity: 576658.132835649
+    charging_port: 8
+    arrival_date: '2025-08-07'
+    arrival_time: 06:04
+    departure_date: '2025-08-07'
+    departure_time: 06:59
