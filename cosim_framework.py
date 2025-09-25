@@ -7,13 +7,10 @@ import yaml
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
-from numpy import shape
 
 from load_reading import give_load_w
-from ev_request import ev_generate_from_config  # (kept for compatibility, not used directly here)
 from car_new import car_create_from_yaml
       # (kept for compatibility)
-from price_market import give_price
 from battery_storage import BatteryStorage
 
 SESSIONS_CSV = "data/data_cars.csv"   # optional sessions file with Initial SoC etc.
